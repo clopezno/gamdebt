@@ -94,14 +94,19 @@ Comment density =comment lines/lines of code
 Visualmente, utilizaremos el paquete `ggplot2` (Wickham, 2016) para visualizar la variabilidad de las observaciones de la variable respuesta (dependiente), a lo largo de los niveles de la variable explicativa (independiente) `group`.
 
 ```{r}
+comment_density<-
 ggplot(data = p4s, aes(x = group_gamification, y = comment_density, label = ID)) +
   geom_boxplot(outlier.size = -1, colour = "gray60") +
   geom_jitter(aes(colour = comment_density), width = 0.1, ) +
   labs(x = "", y = "comment density") +
   theme_classic(base_size = 18) +
   theme(legend.position = "none")
+comment_density
 ```
 
+```{r}
+ggsave("comment_density.png",plot=comment_density,path ="./OUTPUT/FIGURES/h2p4/",dpi = 600,scale = 1 )
+```
 #### Regresión beta
 La formulación de la *regresión beta* sigue la misma sintaxis que los modelos lineales en R.
 ```{r}
@@ -154,12 +159,17 @@ par(op)
 Visualmente, utilizaremos el paquete `ggplot2` (Wickham, 2016) para visualizar la variabilidad de las observaciones de la variable respuesta (dependiente), a lo largo de los niveles de la variable explicativa (independiente) `group`.
 
 ```{r}
+code_to_test <-
 ggplot(data = p4s, aes(x = group_gamification, y = code_to_test, label = ID)) +
   geom_boxplot(outlier.size = -1, colour = "gray60") +
   geom_jitter(aes(colour = code_to_test), width = 0.1, ) +
   labs(x = "", y = "code to test") +
   theme_classic(base_size = 18) +
   theme(legend.position = "none")
+code_to_test
+```
+```{r}
+ggsave("code_to_test.png",plot=code_to_test,path ="./OUTPUT/FIGURES/h2p4/",dpi = 600,scale = 1 )
 ```
 
 #### Regresión beta
@@ -221,13 +231,17 @@ Visualmente, utilizaremos el paquete `ggplot2` (Wickham, 2016) para visualizar l
 
 
 ```{r}
-
+tests <-
 ggplot(data = p4s, aes(x = group_gamification, y = test_success_density, label = ID)) +
   geom_boxplot(outlier.size = -1, colour = "gray60") +
   geom_jitter(aes(colour = test_success_density), width = 0.1, ) +
   labs(x = "", y = " test success density (%)") +
   theme_classic(base_size = 18) +
   theme(legend.position = "none")
+tests
+```
+```{r}
+ggsave("tests.png",plot=tests,path ="./OUTPUT/FIGURES/h2p4/",dpi = 600,scale = 1 )
 ```
 
 #### Regresión beta
@@ -313,13 +327,17 @@ Visualmente, utilizaremos el paquete `ggplot2` (Wickham, 2016) para visualizar l
 
 
 ```{r}
-
+branch_coverage <-
 ggplot(data = p4s, aes(x = group_gamification, y = branch_coverage, label = ID)) +
   geom_boxplot(outlier.size = -1, colour = "gray60") +
   geom_jitter(aes(colour = branch_coverage), width = 0.1, ) +
   labs(x = "", y = "branch coverage (%)") +
-  theme_classic(base_size = 10) +
+  theme_classic(base_size = 18) +
   theme(legend.position = "none")
+branch_coverage
+```
+```{r}
+ggsave("branch_coverage.png",plot=branch_coverage,path ="./OUTPUT/FIGURES/h2p4/",dpi = 600,scale = 1 )
 ```
 
 #### Regresión beta
@@ -401,13 +419,19 @@ Visualmente, utilizaremos el paquete `ggplot2` (Wickham, 2016) para visualizar l
 
 
 ```{r}
-
+smells_density <-
 ggplot(data = p4s, aes(x = group_gamification, y = smells_density, label = ID)) +
   geom_boxplot(outlier.size = -1, colour = "gray60") +
   geom_jitter(aes(colour = smells_density), width = 0.1, ) +
   labs(x = "", y = "smells density") +
   theme_classic(base_size = 18) +
   theme(legend.position = "none")
+
+smells_density
+```
+
+```{r}
+ggsave("smells_density.png",plot=smells_density,path ="./OUTPUT/FIGURES/h2p4/",dpi = 600,scale = 1 )
 ```
 
 #### Regresión beta
@@ -468,13 +492,18 @@ Visualmente, utilizaremos el paquete `ggplot2` (Wickham, 2016) para visualizar l
 
 
 ```{r}
-
+sqale_debt_ratio <-
 ggplot(data = p4s, aes(x = group_gamification, y = sqale_debt_ratio, label = ID)) +
   geom_boxplot(outlier.size = -1, colour = "gray60") +
   geom_jitter(aes(colour = sqale_debt_ratio), width = 0.1, ) +
   labs(x = "", y = "sqale debt ratio (%)") +
   theme_classic(base_size = 18) +
   theme(legend.position = "none")
+sqale_debt_ratio
+```
+
+```{r}
+ggsave("sqale_debt_ratio.png",plot=sqale_debt_ratio,path ="./OUTPUT/FIGURES/h2p4/",dpi = 600,scale = 1 )
 ```
 
 #### Regresión beta
