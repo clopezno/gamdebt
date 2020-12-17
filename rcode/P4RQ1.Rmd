@@ -75,7 +75,6 @@ p4s <- read_csv("INPUT/DATA/p4s_completo.csv") %>%
     ) %>% # Replace with NA high (non normal) values.
   filter(branch_coverage > 50)  %>% # eliminación outlayer
   filter(test_success_density > 30)  %>% # eliminación outlayer
-  filter(group_gamification != 'null')  %>% # eliminación outlayer
   drop_na() #Eliminates NAs in the dataset
 
 p4s
@@ -160,7 +159,7 @@ par(op)
 Visualmente, utilizaremos el paquete `ggplot2` (Wickham, 2016) para visualizar la variabilidad de las observaciones de la variable respuesta (dependiente), a lo largo de los niveles de la variable explicativa (independiente) `group`.
 
 ```{r}
-code_to_tests <-
+code_to_test <-
   ggplot(data = p4s, aes(x = group_method, y = code_to_test, label = ID)) +
   geom_boxplot(outlier.size = -1, colour = "gray60") +
   geom_jitter(aes(colour = code_to_test), width = 0.1, ) +
@@ -168,7 +167,7 @@ code_to_tests <-
   theme_classic(base_size = 18) +
   theme(legend.position = "none")
 
-code_to_tests
+code_to_test
 ```
 ```{r}
 ggsave("code_to_test.png",plot=code_to_test,path ="./OUTPUT/FIGURES/h1p4/",dpi = 600,scale = 1.5 )
