@@ -62,7 +62,7 @@ p4s <- read_csv("INPUT/DATA/p4s_completo.csv") %>%
   rename(., ID = X1) %>% # Give a column's name to the first column (it had no name)
   mutate(group = factor(group),
          group_method = factor(group_method, levels = c("core","sonarQube","gamification")),
-         group_gamification = factor(group_gamification),
+         group_gamification = factor(group_gamification,  levels = c("ranking", "live ranking")),
          project = factor(project)) %>% # Create some factors
   mutate(
     comment_density = ifelse(comment_density > 1, NA, comment_density),

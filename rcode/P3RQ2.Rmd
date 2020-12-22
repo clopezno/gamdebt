@@ -62,7 +62,7 @@ p3s <- read_csv("INPUT/DATA/p3s_completo.csv") %>%
   rename(., ID = X1) %>% # Give a column's name to the first column (it had no name)
   mutate(group = factor(group),
          group_method = factor(group_method, levels = c("core","sonarQube","gamification")),
-         group_gamification = factor(group_gamification),
+         group_gamification = factor(group_gamification, levels = c("ranking", "live ranking")),
          project = factor(project)) %>% # Create some factors
   mutate(
     comment_density = ifelse(comment_density > 1, NA, comment_density),
@@ -335,7 +335,7 @@ branch_coverage
 ```
 ```{r}
 branch_coverage
-ggsave("branch_coverage.png",plot=branch_coverage,path ="./OUTPUT/FIGURES/h2p3/",dpi = 600,scale = 1.5 )
+ggsave("branch_coverage.png",plot=branch_coverage,path ="./OUTPUT/FIGURES/h2p3/",dpi = 600,scale = 1)
 ```
 
 #### Regresión beta
