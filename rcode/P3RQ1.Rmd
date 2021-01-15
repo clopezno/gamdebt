@@ -75,10 +75,11 @@ p3s <- read_csv("INPUT/DATA/p3s_completo.csv") %>%
     branch_coverage = ifelse(branch_coverage == 100, 99, branch_coverage),
     branch_coverage = ifelse(branch_coverage == 0, 0.01, branch_coverage),
      sqale_debt_ratio = ifelse(sqale_debt_ratio == 0, 0.01, sqale_debt_ratio),
-    test_success_density = ifelse(test_success_density == 100, 99, test_success_density)
-    ) %>% # Replace with NA high (non normal) values.
+    test_success_density = ifelse(test_success_density == 100, 99, test_success_density)) %>% # Replace with NA high (non normal) values.
   filter(branch_coverage > 50)  %>% # eliminación outlayer
-  filter(test_success_density > 30)  %>% # eliminación outlayer
+  #filter(test_success_density > 30)  %>% # eliminación outlayer
+  #filter(group == "2016-2017" | group == "2017-2018" | group == "2018-2019")  %>% # eliminación outlayer
+  filter(group == "2017-2018" | group == "2018-2019"|group=="2016-2017" )  %>%
   drop_na() #Eliminates NAs in the dataset
 
 p3s
@@ -136,7 +137,9 @@ summary(p3s_br)
 #### Tabla ANOVA
 Para poder resumir el modelo en una tabla tipo ANOVA, usamos la función `joint_tests` y se lee e interpreta de igual manera.
 ```{r}
-joint_tests(p3s_br)
+p3_ANOVA_CD=joint_tests(p3s_br)
+p3_ANOVA_CD
+
 ```
 
 #### PostHoc (Tukey)
@@ -207,7 +210,8 @@ summary(p3s_br)
 #### Tabla ANOVA
 Para poder resumir el modelo en una tabla tipo ANOVA, usamos la función `joint_tests` y se lee e interpreta de igual manera.
 ```{r}
-joint_tests(p3s_br)
+p3_ANOVA_C2T=joint_tests(p3s_br)
+p3_ANOVA_C2T
 ```
 
 #### PostHoc (Tukey)
@@ -393,7 +397,8 @@ summary(p3s_br)
 #### Tabla ANOVA
 Para poder resumir el modelo en una tabla tipo ANOVA, usamos la función `joint_tests` y se lee e interpreta de igual manera.
 ```{r}
-joint_tests(p3s_br)
+p3_ANOVA_BC=joint_tests(p3s_br)
+p3_ANOVA_BC
 ```
 
 #### PostHoc (Tukey)
@@ -467,7 +472,8 @@ summary(p3s_br)
 #### Tabla ANOVA
 Para poder resumir el modelo en una tabla tipo ANOVA, usamos la función `joint_tests` y se lee e interpreta de igual manera.
 ```{r}
-joint_tests(p3s_br)
+p3_ANOVA_SD=joint_tests(p3s_br)
+p3_ANOVA_SD
 ```
 
 #### PostHoc (Tukey)
@@ -562,7 +568,8 @@ summary(p3s_br)
 #### Tabla ANOVA
 Para poder resumir el modelo en una tabla tipo ANOVA, usamos la función `joint_tests` y se lee e interpreta de igual manera.
 ```{r}
-joint_tests(p3s_br)
+p3_ANOVA_TDR=joint_tests(p3s_br)
+p3_ANOVA_TDR
 ```
 
 #### PostHoc (Tukey)
@@ -580,6 +587,31 @@ Finalmente, y como medida secundaria para evaluar la bondad de ajuste del modelo
 op <- par(mfrow = c(2,2))
 plot(p3s_br)
 par(op)
+```
+## Resumen de test ANOVA
+Comment density (CD)
+```{r}
+p3_ANOVA_CD
+```
+
+Code to test(C2T)
+```{r}
+p3_ANOVA_C2T
+```
+
+Branchcoverage(BC)
+```{r}
+p3_ANOVA_BC
+```
+
+Smellsdensity (SD)
+```{r}
+p3_ANOVA_SD
+```
+
+Technicaldebt ratio(TDR)
+```{r}
+p3_ANOVA_TDR
 ```
 
 
