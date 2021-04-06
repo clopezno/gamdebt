@@ -507,7 +507,7 @@ sqale_debt_ratio <-
 ggplot(data = p4s, aes(x = group_method, y = sqale_debt_ratio, label = ID)) +
   geom_boxplot(outlier.size = -1, colour = "gray60") +
   geom_jitter(aes(colour = sqale_debt_ratio), width = 0.1, ) +
-  labs(x = "", y = "sqale debt ratio (%)") +
+  labs(x = "", y = "technical debt ratio (%)") +
   theme_classic(base_size = 18) +
   theme(legend.position = "none")
 sqale_debt_ratio
