@@ -79,7 +79,7 @@ p3s <- read_csv("INPUT/DATA/p3s_completo.csv") %>%
   filter(branch_coverage > 50)  %>% # eliminación outlayer
   #filter(test_success_density > 30)  %>% # eliminación outlayer
   #filter(group == "2016-2017" | group == "2017-2018" | group == "2018-2019")  %>% # eliminación outlayer
-  filter(group == "2017-2018" | group == "2018-2019"|group=="2016-2017" )  %>%
+  filter(group == "2016-2017" | group == "2017-2018")  %>%
   drop_na() #Eliminates NAs in the dataset
 
 p3s
@@ -90,6 +90,8 @@ Para explorar el set de datos `p3s` usaremos la función `summary()` que nos ent
 ```{r}
 summary(p3s)
 ```
+
+
 ### Densidad de comentarios
 Comment density =comment lines/lines of code 
 [página de documentación oficial de SonarQube](https://docs.sonarqube.org/latest/user-guide/metric-definitions/).
@@ -103,6 +105,9 @@ ggplot(data = p3s, aes(x = group_method, y = comment_density, label = ID)) +
   geom_boxplot(outlier.size = -1, colour = "gray60") +
   geom_jitter(aes(colour = comment_density), width = 0.1, ) +
   labs(x = "", y = " comment_density (%)") +
+  #stat_summary(fun = "mean", colour = "red", size = 0.3)+
+  stat_summary(fun.data = "mean_cl_boot", colour = "red", size = 0.3)+
+  labs(x = "", y = "branch coverage (%)")+
   theme_classic(base_size = 18) +
   theme(legend.position = "none") 
   
@@ -182,6 +187,8 @@ ggsave("code_to_test.png",plot=code_to_test,path ="./OUTPUT/FIGURES/h1p3/",dpi =
 
 #### Regresión beta
 La formulación de la *regresión beta* sigue la misma sintaxis que los modelos lineales en R.
+
+
 
 
 ```{r}
@@ -303,7 +310,7 @@ summary(p3s_br)
 ```
 
 
-#### Tabla ANOVA
+#### Tabla ANOVA - t-Student
 Para poder resumir el modelo en una tabla tipo ANOVA, usamos la función `joint_tests` y se lee e interpreta de igual manera.
 ```{r}
 joint_tests(p3s_br)
@@ -612,6 +619,29 @@ p3_ANOVA_SD
 Technicaldebt ratio(TDR)
 ```{r}
 p3_ANOVA_TDR
+```
+
+```{r}
+print("CDp3mean")
+meanCDp3 <- tapply(p3s$comment_density,p3s$group_method, mean)
+print( meanCDp3)
+
+print("C2Tp3mean")
+meanC2Tp3 <- tapply(p3s$code_to_test,p3s$group_method, mean)
+print( meanC2Tp3)
+
+print("BCp3mean")
+meanTDRp3 <- tapply(p3s$branch_coverage.rescaled,p3s$group_method, mean)
+print( meanTDRp3)
+
+print("SDp3mean")
+meanSDp3 <- tapply(p3s$smells_density,p3s$group_method, mean)
+print( meanSDp3)
+
+print("TDRp3mean")
+meanTDRp3 <- tapply(p3s$sqale_debt_ratio.rescaled,p3s$group_method, mean)
+print( meanTDRp3)
+
 ```
 
 
