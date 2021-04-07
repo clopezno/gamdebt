@@ -107,7 +107,6 @@ ggplot(data = p3s, aes(x = group_method, y = comment_density, label = ID)) +
   labs(x = "", y = " comment_density (%)") +
   stat_summary(fun = "mean", colour = "red", fill="blue", size = 0.8, shape=23)+
   #stat_summary(fun.data = "mean_cl_boot", colour = "red", size = 0.4)+
-  labs(x = "", y = "branch coverage (%)")+
   #lims(y = c(0,100)) +
   theme_classic(base_size = 18) +
   theme(legend.position = "none") 
@@ -351,7 +350,7 @@ ggplot(data = p3s, aes(x = group_method, y = branch_coverage, label = ID)) +
   geom_boxplot(outlier.size = -1, colour = "gray60") +
   geom_jitter(aes(colour = branch_coverage), width = 0.1, ) +
   stat_summary(fun = "mean", colour = "red", fill="blue", size = 0.8, shape=23)+
-  labs(x = "", y = "Branch coverage (%)") +
+  labs(x = "", y = "branch coverage (%)") +
   theme_classic(base_size = 18) +
   theme(legend.position = "none")
 branch_coverage 
