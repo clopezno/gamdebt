@@ -105,9 +105,10 @@ ggplot(data = p3s, aes(x = group_method, y = comment_density, label = ID)) +
   geom_boxplot(outlier.size = -1, colour = "gray60") +
   geom_jitter(aes(colour = comment_density), width = 0.1, ) +
   labs(x = "", y = " comment_density (%)") +
-  #stat_summary(fun = "mean", colour = "red", size = 0.3)+
-  stat_summary(fun.data = "mean_cl_boot", colour = "red", size = 0.3)+
+  stat_summary(fun = "mean", colour = "red", fill="blue", size = 0.8, shape=23)+
+  #stat_summary(fun.data = "mean_cl_boot", colour = "red", size = 0.4)+
   labs(x = "", y = "branch coverage (%)")+
+  #lims(y = c(0,100)) +
   theme_classic(base_size = 18) +
   theme(legend.position = "none") 
   
@@ -175,6 +176,7 @@ code_to_test <-
 ggplot(data = p3s, aes(x = group_method, y = code_to_test, label = ID)) +
   geom_boxplot(outlier.size = -1, colour = "gray60") +
   geom_jitter(aes(colour = code_to_test), width = 0.1, ) +
+  stat_summary(fun = "mean", colour = "red", fill="blue", size = 0.8, shape=23)+
   labs(x = "", y = "code to test") +
   theme_classic(base_size = 18) +
   theme(legend.position = "none")
@@ -251,6 +253,7 @@ tests<-
 ggplot(data = p3s, aes(x = group_method, y = test_success_density, label = ID)) +
   geom_boxplot(outlier.size = -1, colour = "gray60") +
   geom_jitter(aes(colour = test_success_density), width = 0.1, ) +
+  stat_summary(fun = "mean", colour = "red", fill="blue", size = 0.8, shape=23)+
   labs(x = "", y = "test_success_density (%)") +
   theme_classic(base_size = 18) +
   theme(legend.position = "none")
@@ -347,6 +350,7 @@ branch_coverage <-
 ggplot(data = p3s, aes(x = group_method, y = branch_coverage, label = ID)) +
   geom_boxplot(outlier.size = -1, colour = "gray60") +
   geom_jitter(aes(colour = branch_coverage), width = 0.1, ) +
+  stat_summary(fun = "mean", colour = "red", fill="blue", size = 0.8, shape=23)+
   labs(x = "", y = "Branch coverage (%)") +
   theme_classic(base_size = 18) +
   theme(legend.position = "none")
@@ -369,6 +373,7 @@ p3s$branch_coverage.rescaled <- (p3s$branch_coverage/100)
 ggplot(data = p3s, aes(x = group_method, y = branch_coverage.rescaled, label = ID)) +
   geom_boxplot(outlier.size = -1, colour = "gray60") +
   geom_jitter(aes(colour = branch_coverage.rescaled), width = 0.1, ) +
+  stat_summary(fun = "mean", colour = "red", fill="blue", size = 0.8, shape=23)+
   labs(x = "", y = "branch coverage rescaled") +
   theme_classic(base_size = 18) +
   theme(legend.position = "none")
@@ -440,6 +445,7 @@ smells_density <-
 ggplot(data = p3s, aes(x = group_method, y = smells_density, label = ID)) +
   geom_boxplot(outlier.size = -1, colour = "gray60") +
   geom_jitter(aes(colour = smells_density), width = 0.1, ) +
+  stat_summary(fun = "mean", colour = "red", fill="blue", size = 0.8, shape=23)+
   labs(x = "", y = "smells density") +
   theme_classic(base_size = 18) +
   theme(legend.position = "none")
@@ -512,6 +518,7 @@ sqale_debt_ratio <-
 ggplot(data = p3s, aes(x = group_method, y = sqale_debt_ratio, label = ID)) +
   geom_boxplot(outlier.size = -1, colour = "gray60") +
   geom_jitter(aes(colour = sqale_debt_ratio), width = 0.1, ) +
+  stat_summary(fun = "mean", colour = "red", fill="blue", size = 0.8, shape=23)+
   labs(x = "", y = "technical debt ratio (%)") +
   theme_classic(base_size = 18) +
   theme(legend.position = "none")
@@ -534,6 +541,7 @@ p3s$sqale_debt_ratio.rescaled <- (p3s$sqale_debt_ratio/(maximo +0.01))
 ggplot(data = p3s, aes(x = group_method, y = sqale_debt_ratio.rescaled, label = ID)) +
   geom_boxplot(outlier.size = -1, colour = "gray60") +
   geom_jitter(aes(colour = sqale_debt_ratio.rescaled), width = 0.1, ) +
+  stat_summary(fun = "mean", colour = "red", fill="blue", size = 0.8, shape=23)+
   labs(x = "", y = "sqale debt ratio rescaled") +
   theme_classic(base_size=18) +
   theme(legend.position = "none")

@@ -15,9 +15,9 @@ output:
 ---
 
 # Razonamiento
-Evaluar si existen diferencias en las medias proporcionadas por SonarQube en  los diferentes cursos académicos (variable `group_gamification`). En distintos cursos se han utilizado distintos métodos de enseñanza mediante gamificación (delayed,real_time).
+Evaluar si existen diferencias en las medias proporcionadas por SonarQube en  los diferentes cursos académicos (variable `group_method`). En distintos cursos se han utilizado distintos métodos de enseñanza (core,sonarQube, gamification).
 
-Las variables dependientes corresponden a medidas diferentes porcentajes/ratio que deberán ser comparados a través de los diferentes cursos, variable llamada `group_gamification`. Las detalles descriptivos de las medidas pueden obtenerse en la [página de documentación oficial de SonarQube](https://docs.sonarqube.org/latest/user-guide/metric-definitions/).
+Las variables dependientes corresponden a medidas diferentes porcentajes/ratio que deberán ser comparados a través de los diferentes cursos, variable llamada `group_method`. Las detalles descriptivos de las medidas pueden obtenerse en la [página de documentación oficial de SonarQube](https://docs.sonarqube.org/latest/user-guide/metric-definitions/).
 A partir de las métricas base de sonarQube calculamos dos métricas derivadas:
 - ratio*comment_density*, se calcula como 
 comment_lines/(comment_lines+ncloc).
@@ -61,8 +61,8 @@ A continuación comenzamos con la carga de la base de datos p4s
 p4s <- read_csv("INPUT/DATA/p4s_completo.csv") %>%
   rename(., ID = X1) %>% # Give a column's name to the first column (it had no name)
   mutate(group = factor(group),
-         group_method = factor(group_method, levels = c("core","sonarQube","gamification")),
-         group_gamification = factor(group_gamification,  levels = c("ranking", "live ranking")),
+         group_method = factor(group_method,levels = c("core","sonarQube","gamification")),
+         group_gamification = factor(group_gamification),
          project = factor(project)) %>% # Create some factors
   mutate(
     comment_density = ifelse(comment_density > 1, NA, comment_density),
@@ -74,8 +74,10 @@ p4s <- read_csv("INPUT/DATA/p4s_completo.csv") %>%
     test_success_density = ifelse(test_success_density == 100, 99, test_success_density)
     ) %>% # Replace with NA high (non normal) values.
   filter(branch_coverage > 50)  %>% # eliminación outlayer
-  filter(test_success_density > 30)  %>% # eliminación outlayer
-  filter(group_gamification != 'null')  %>% # eliminación outlayer
+  #filter(test_success_density > 30)  %>% # eliminación outlayer
+   #filter(group == "2016-2017" | group == "2017-2018" | group == "2018-2019" )%>%
+  filter(group == "2017-2018" | group == "2018-2019" )%>%
+  
   drop_na() #Eliminates NAs in the dataset
 
 p4s
@@ -94,23 +96,25 @@ Comment density =comment lines/lines of code
 Visualmente, utilizaremos el paquete `ggplot2` (Wickham, 2016) para visualizar la variabilidad de las observaciones de la variable respuesta (dependiente), a lo largo de los niveles de la variable explicativa (independiente) `group`.
 
 ```{r}
-comment_density<-
-ggplot(data = p4s, aes(x = group_gamification, y = comment_density, label = ID)) +
+comment_density <-
+ggplot(data = p4s, aes(x = group_method, y = comment_density, label = ID)) +
   geom_boxplot(outlier.size = -1, colour = "gray60") +
   geom_jitter(aes(colour = comment_density), width = 0.1, ) +
-  labs(x = "", y = "comment density") +
+  stat_summary(fun = "mean", colour = "red", fill="blue", size = 0.8, shape=23)+
+  labs(x = "", y = "comment density (%)") +
   theme_classic(base_size = 18) +
   theme(legend.position = "none")
+
 comment_density
 ```
-
 ```{r}
 ggsave("comment_density.png",plot=comment_density,path ="./OUTPUT/FIGURES/h2p4/",dpi = 600,scale = 1 )
 ```
+
 #### Regresión beta
 La formulación de la *regresión beta* sigue la misma sintaxis que los modelos lineales en R.
 ```{r}
-p4s_br <- betareg(formula = comment_density ~ group_gamification, data = p4s)
+p4s_br <- betareg(formula = comment_density ~ group_method, data = p4s)
 ```
 
 #### Coeficientes
@@ -121,7 +125,7 @@ coef(p4s_br)
 
 Podemos caracterizar los Intervalos de Confianza (IC) basados en las predicciones sobre la variable independiente `group`, usando la función `ggpredict()`
 ```{r}
-ggpredict(p4s_br, terms = "group_gamification")
+ggpredict(p4s_br, terms = "group_method")
 ```
 
 El resumen del modelo, de donde podemos obtener, por ejemplo el valor de ajuste (R cuadrado) se obtiene mediante:
@@ -132,7 +136,8 @@ summary(p4s_br)
 #### Tabla ANOVA
 Para poder resumir el modelo en una tabla tipo ANOVA, usamos la función `joint_tests` y se lee e interpreta de igual manera.
 ```{r}
-joint_tests(p4s_br)
+p4_ANOVA_CD=joint_tests(p4s_br)
+p4_ANOVA_CD
 ```
 
 #### PostHoc (Tukey)
@@ -141,7 +146,7 @@ Debido a que la tabla anterior nos dice que sí hay diferencias significativas e
 # p4s_br_emms <- emmeans(p4s_br, "group")
 # pairs(p4s_br_emms)
 
-pairs(emmeans(p4s_br, "group_gamification"))
+pairs(emmeans(p4s_br, "group_method"))
 ```
 
 #### Inspección de residuales
@@ -160,16 +165,18 @@ Visualmente, utilizaremos el paquete `ggplot2` (Wickham, 2016) para visualizar l
 
 ```{r}
 code_to_test <-
-ggplot(data = p4s, aes(x = group_gamification, y = code_to_test, label = ID)) +
+  ggplot(data = p4s, aes(x = group_method, y = code_to_test, label = ID)) +
   geom_boxplot(outlier.size = -1, colour = "gray60") +
   geom_jitter(aes(colour = code_to_test), width = 0.1, ) +
+  stat_summary(fun = "mean", colour = "red", fill="blue", size = 0.8, shape=23)+
   labs(x = "", y = "code to test") +
   theme_classic(base_size = 18) +
   theme(legend.position = "none")
+
 code_to_test
 ```
 ```{r}
-ggsave("code_to_test.png",plot=code_to_test,path ="./OUTPUT/FIGURES/h2p4/",dpi = 600,scale = 1 )
+ggsave("code_to_test.png",plot=code_to_test,path ="./OUTPUT/FIGURES/h2p4/",dpi = 600,scale = 1.5 )
 ```
 
 #### Regresión beta
@@ -177,7 +184,7 @@ La formulación de la *regresión beta* sigue la misma sintaxis que los modelos 
 
 
 ```{r}
-p4s_br <- betareg(formula = code_to_test ~ group_gamification, data = p4s)
+p4s_br <- betareg(formula = code_to_test ~ group_method, data = p4s)
 ```
 
 
@@ -190,7 +197,7 @@ coef(p4s_br)
 
 Podemos caracterizar los Intervalos de Confianza (IC) basados en las predicciones sobre la variable independiente `group`, usando la función `ggpredict()`
 ```{r}
-ggpredict(p4s_br, terms = "group_gamification")
+ggpredict(p4s_br, terms = "group_method")
 ```
 
 El resumen del modelo, de donde podemos obtener, por ejemplo el valor de ajuste (R cuadrado) se obtiene mediante:
@@ -202,7 +209,8 @@ summary(p4s_br)
 #### Tabla ANOVA
 Para poder resumir el modelo en una tabla tipo ANOVA, usamos la función `joint_tests` y se lee e interpreta de igual manera.
 ```{r}
-joint_tests(p4s_br)
+p4_ANOVA_C2T=joint_tests(p4s_br)
+p4_ANOVA_C2T
 ```
 
 #### PostHoc (Tukey)
@@ -211,7 +219,7 @@ Debido a que la tabla anterior nos dice que sí hay diferencias significativas e
 # p4s_br_emms <- emmeans(p4s_br, "group")
 # pairs(p4s_br_emms)
 
-pairs(emmeans(p4s_br, "group_gamification"))
+pairs(emmeans(p4s_br, "group_method"))
 ```
 
 #### Inspección de residuales
@@ -231,13 +239,16 @@ Visualmente, utilizaremos el paquete `ggplot2` (Wickham, 2016) para visualizar l
 
 
 ```{r}
+
 tests <-
-ggplot(data = p4s, aes(x = group_gamification, y = test_success_density, label = ID)) +
+ggplot(data = p4s, aes(x = group_method, y = test_success_density, label = ID)) +
   geom_boxplot(outlier.size = -1, colour = "gray60") +
   geom_jitter(aes(colour = test_success_density), width = 0.1, ) +
-  labs(x = "", y = " test success density (%)") +
+  stat_summary(fun = "mean", colour = "red", fill="blue", size = 0.8, shape=23)+
+  labs(x = "", y = "test success density (%)") +
   theme_classic(base_size = 18) +
   theme(legend.position = "none")
+
 tests
 ```
 ```{r}
@@ -255,9 +266,10 @@ p4s$test_success_density.rescaled <- (p4s$test_success_density/100)
 
 ```{r}
 
-ggplot(data = p4s, aes(x = group_gamification, y = test_success_density.rescaled, label = ID)) +
+ggplot(data = p4s, aes(x = group_method, y = test_success_density.rescaled, label = ID)) +
   geom_boxplot(outlier.size = -1, colour = "gray60") +
   geom_jitter(aes(colour = test_success_density.rescaled), width = 0.1, ) +
+  stat_summary(fun = "mean", colour = "red", fill="blue", size = 0.8, shape=23)+
   labs(x = "", y = "Densidad test unitarios exitoso (%)") +
   theme_classic() +
   theme(legend.position = "none")
@@ -273,7 +285,7 @@ summary(p4s$test_success_density.rescaled)
 
 
 ```{r}
-p4s_br <- betareg(formula = test_success_density.rescaled ~ group_gamification, data = p4s)
+p4s_br <- betareg(formula = test_success_density.rescaled ~ group_method, data = p4s)
 ```
 
 
@@ -285,7 +297,7 @@ coef(p4s_br)
 
 Podemos caracterizar los Intervalos de Confianza (IC) basados en las predicciones sobre la variable independiente `group`, usando la función `ggpredict()`
 ```{r}
-ggpredict(p4s_br, terms = "group_gamification")
+ggpredict(p4s_br, terms = "group_method")
 ```
 
 El resumen del modelo, de donde podemos obtener, por ejemplo el valor de ajuste (R cuadrado) se obtiene mediante:
@@ -306,7 +318,7 @@ Debido a que la tabla anterior nos dice que sí hay diferencias significativas e
 # p4s_br_emms <- emmeans(p4s_br, "group")
 # pairs(p4s_br_emms)
 
-pairs(emmeans(p4s_br, "group_gamification"))
+pairs(emmeans(p4s_br, "group_method"))
 ```
 
 #### Inspección de residuales
@@ -328,16 +340,19 @@ Visualmente, utilizaremos el paquete `ggplot2` (Wickham, 2016) para visualizar l
 
 ```{r}
 branch_coverage <-
-ggplot(data = p4s, aes(x = group_gamification, y = branch_coverage, label = ID)) +
+ggplot(data = p4s, aes(x = group_method, y = branch_coverage, label = ID)) +
   geom_boxplot(outlier.size = -1, colour = "gray60") +
   geom_jitter(aes(colour = branch_coverage), width = 0.1, ) +
+  stat_summary(fun = "mean", colour = "red", fill="blue", size = 0.8, shape=23)+
+  #stat_summary(fun.data = "mean_cl_boot", colour = "red", size = 0.3)+
   labs(x = "", y = "branch coverage (%)") +
+  #lims(y = c(0,100)) +
   theme_classic(base_size = 18) +
   theme(legend.position = "none")
 branch_coverage
 ```
 ```{r}
-ggsave("branch_coverage.png",plot=branch_coverage,path ="./OUTPUT/FIGURES/h2p4/",dpi = 600,scale = 1 )
+ggsave("branch_coverage.png",plot=branch_coverage,path ="./OUTPUT/FIGURES/h2p4/",dpi = 600,scale = 1.5 )
 ```
 
 #### Regresión beta
@@ -350,9 +365,10 @@ p4s$branch_coverage.rescaled <- (p4s$branch_coverage/100)
 
 
 ```{r}
-ggplot(data = p4s, aes(x = group_gamification, y = branch_coverage.rescaled, label = ID)) +
+ggplot(data = p4s, aes(x = group_method, y = branch_coverage.rescaled, label = ID)) +
   geom_boxplot(outlier.size = -1, colour = "gray60") +
   geom_jitter(aes(colour = branch_coverage.rescaled), width = 0.1, ) +
+  stat_summary(fun = "mean", colour = "red", fill="blue", size = 0.8, shape=23)+
   labs(x = "", y = "branch coverage rescaled") +
   theme_classic(base_size = 18) +
   theme(legend.position = "none")
@@ -364,7 +380,7 @@ summary(p4s$branch_coverage.rescaled)
 
 
 ```{r}
-p4s_br <- betareg(formula = branch_coverage.rescaled ~ group_gamification, data = p4s)
+p4s_br <- betareg(formula = branch_coverage.rescaled ~ group_method, data = p4s)
 ```
 
 
@@ -376,7 +392,7 @@ coef(p4s_br)
 
 Podemos caracterizar los Intervalos de Confianza (IC) basados en las predicciones sobre la variable independiente `group`, usando la función `ggpredict()`
 ```{r}
-ggpredict(p4s_br, terms = "group_gamification")
+ggpredict(p4s_br, terms = "group_method")
 ```
 
 El resumen del modelo, de donde podemos obtener, por ejemplo el valor de ajuste (R cuadrado) se obtiene mediante:
@@ -388,7 +404,8 @@ summary(p4s_br)
 #### Tabla ANOVA
 Para poder resumir el modelo en una tabla tipo ANOVA, usamos la función `joint_tests` y se lee e interpreta de igual manera.
 ```{r}
-joint_tests(p4s_br)
+p4_ANOVA_BC=joint_tests(p4s_br)
+p4_ANOVA_BC
 ```
 
 #### PostHoc (Tukey)
@@ -397,7 +414,7 @@ Debido a que la tabla anterior nos dice que sí hay diferencias significativas e
 # p4s_br_emms <- emmeans(p4s_br, "group")
 # pairs(p4s_br_emms)
 
-pairs(emmeans(p4s_br, "group_gamification"))
+pairs(emmeans(p4s_br, "group_method"))
 ```
 
 #### Inspección de residuales
@@ -420,18 +437,17 @@ Visualmente, utilizaremos el paquete `ggplot2` (Wickham, 2016) para visualizar l
 
 ```{r}
 smells_density <-
-ggplot(data = p4s, aes(x = group_gamification, y = smells_density, label = ID)) +
+ggplot(data = p4s, aes(x = group_method, y = smells_density, label = ID)) +
   geom_boxplot(outlier.size = -1, colour = "gray60") +
   geom_jitter(aes(colour = smells_density), width = 0.1, ) +
+  stat_summary(fun = "mean", colour = "red", fill="blue", size = 0.8, shape=23)+
   labs(x = "", y = "smells density") +
   theme_classic(base_size = 18) +
   theme(legend.position = "none")
-
 smells_density
 ```
-
 ```{r}
-ggsave("smells_density.png",plot=smells_density,path ="./OUTPUT/FIGURES/h2p4/",dpi = 600,scale = 1 )
+ggsave("smells_density.png",plot=smells_density,path ="./OUTPUT/FIGURES/h2p4/",dpi = 600,scale = 1.5 )
 ```
 
 #### Regresión beta
@@ -440,7 +456,7 @@ La formulación de la *regresión beta* sigue la misma sintaxis que los modelos 
 
 
 ```{r}
-p4s_br <- betareg(formula = smells_density ~ group_gamification, data = p4s)
+p4s_br <- betareg(formula = smells_density ~ group_method, data = p4s)
 ```
 
 
@@ -452,7 +468,7 @@ coef(p4s_br)
 
 Podemos caracterizar los Intervalos de Confianza (IC) basados en las predicciones sobre la variable independiente `group`, usando la función `ggpredict()`
 ```{r}
-ggpredict(p4s_br, terms = "group_gamification")
+ggpredict(p4s_br, terms = "group_method")
 ```
 
 El resumen del modelo, de donde podemos obtener, por ejemplo el valor de ajuste (R cuadrado) se obtiene mediante:
@@ -464,7 +480,8 @@ summary(p4s_br)
 #### Tabla ANOVA
 Para poder resumir el modelo en una tabla tipo ANOVA, usamos la función `joint_tests` y se lee e interpreta de igual manera.
 ```{r}
-joint_tests(p4s_br)
+p4_ANOVA_SD=joint_tests(p4s_br)
+p4_ANOVA_SD
 ```
 
 #### PostHoc (Tukey)
@@ -473,7 +490,7 @@ Debido a que la tabla anterior nos dice que sí hay diferencias significativas e
 # p4s_br_emms <- emmeans(p4s_br, "group")
 # pairs(p4s_br_emms)
 
-pairs(emmeans(p4s_br, "group_gamification"))
+pairs(emmeans(p4s_br, "group_method"))
 ```
 
 #### Inspección de residuales
@@ -493,17 +510,17 @@ Visualmente, utilizaremos el paquete `ggplot2` (Wickham, 2016) para visualizar l
 
 ```{r}
 sqale_debt_ratio <-
-ggplot(data = p4s, aes(x = group_gamification, y = sqale_debt_ratio, label = ID)) +
+ggplot(data = p4s, aes(x = group_method, y = sqale_debt_ratio, label = ID)) +
   geom_boxplot(outlier.size = -1, colour = "gray60") +
   geom_jitter(aes(colour = sqale_debt_ratio), width = 0.1, ) +
-  labs(x = "", y = "sqale debt ratio (%)") +
+  stat_summary(fun = "mean", colour = "red", fill="blue", size = 0.8, shape=23)+
+  labs(x = "", y = "technical debt ratio (%)") +
   theme_classic(base_size = 18) +
   theme(legend.position = "none")
 sqale_debt_ratio
 ```
-
 ```{r}
-ggsave("sqale_debt_ratio.png",plot=sqale_debt_ratio,path ="./OUTPUT/FIGURES/h2p4/",dpi = 600,scale = 1 )
+ggsave("sqale_debt_ratio.png",plot=sqale_debt_ratio,path ="./OUTPUT/FIGURES/h2p4/",dpi = 600,scale = 1.5 )
 ```
 
 #### Regresión beta
@@ -516,10 +533,11 @@ p4s$sqale_debt_ratio.rescaled <- (p4s$sqale_debt_ratio/(maximo +0.01))
 
 
 ```{r}
-ggplot(data = p4s, aes(x = group_gamification, y = sqale_debt_ratio.rescaled, label = ID)) +
+ggplot(data = p4s, aes(x = group_method, y = sqale_debt_ratio.rescaled, label = ID)) +
   geom_boxplot(outlier.size = -1, colour = "gray60") +
   geom_jitter(aes(colour = sqale_debt_ratio.rescaled), width = 0.1, ) +
-  labs(x = "", y = "sqale debt ratio rescaled") +
+  stat_summary(fun = "mean", colour = "red", fill="blue", size = 0.8, shape=23)+
+  labs(x = "", y = "sqale debt ratio rescaled)") +
   theme_classic(base_size = 18) +
   theme(legend.position = "none")
 ```
@@ -533,7 +551,7 @@ summary(p4s$sqale_debt_ratio.rescaled)
 
 
 ```{r}
-p4s_br <- betareg(formula = sqale_debt_ratio.rescaled ~ group_gamification, data = p4s)
+p4s_br <- betareg(formula = sqale_debt_ratio.rescaled ~ group_method, data = p4s)
 ```
 
 
@@ -548,7 +566,7 @@ coef(p4s_br)
 
 Podemos caracterizar los Intervalos de Confianza (IC) basados en las predicciones sobre la variable independiente `group`, usando la función `ggpredict()`
 ```{r}
-ggpredict(p4s_br, terms = "group_gamification")
+ggpredict(p4s_br, terms = "group_method")
 ```
 
 El resumen del modelo, de donde podemos obtener, por ejemplo el valor de ajuste (R cuadrado) se obtiene mediante:
@@ -560,7 +578,8 @@ summary(p4s_br)
 #### Tabla ANOVA
 Para poder resumir el modelo en una tabla tipo ANOVA, usamos la función `joint_tests` y se lee e interpreta de igual manera.
 ```{r}
-joint_tests(p4s_br)
+p4_ANOVA_TDR=joint_tests(p4s_br)
+p4_ANOVA_TDR
 ```
 
 #### PostHoc (Tukey)
@@ -569,7 +588,7 @@ Debido a que la tabla anterior nos dice que sí hay diferencias significativas e
 # p4s_br_emms <- emmeans(p4s_br, "group")
 # pairs(p4s_br_emms)
 
-pairs(emmeans(p4s_br, "group_gamification"))
+pairs(emmeans(p4s_br, "group_method"))
 ```
 
 #### Inspección de residuales
@@ -579,7 +598,53 @@ op <- par(mfrow = c(2,2))
 plot(p4s_br)
 par(op)
 ```
+## Resumen de test ANOVA
+Comment density (CD)
+```{r}
+p4_ANOVA_CD
+```
 
+Code to test(C2T)
+```{r}
+p4_ANOVA_C2T
+```
+
+Branchcoverage(BC)
+```{r}
+p4_ANOVA_BC
+```
+
+Smellsdensity (SD)
+```{r}
+p4_ANOVA_SD
+```
+
+Technicaldebt ratio(TDR)
+```{r}
+p4_ANOVA_TDR
+```
+```{r}
+print("CDp4mean")
+meanCDp4 <- tapply(p4s$comment_density,p4s$group_method, mean)
+print( meanCDp4)
+
+print("C2Tp4mean")
+meanC2Tp4 <- tapply(p4s$code_to_test,p4s$group_method, mean)
+print( meanC2Tp4)
+
+print("BCp4mean")
+meanTDRp4 <- tapply(p4s$branch_coverage.rescaled,p4s$group_method, mean)
+print( meanTDRp4)
+
+print("SDp4mean")
+meanSDp4 <- tapply(p4s$smells_density,p4s$group_method, mean)
+print( meanSDp4)
+
+print("TDRp4mean")
+meanTDRp4 <- tapply(p4s$sqale_debt_ratio.rescaled,p4s$group_method, mean)
+print( meanTDRp4)
+
+```
 
 ## Referencias
 
