@@ -1,0 +1,227 @@
+---
+title: "Effect Size"
+output:
+  html_document: default
+  pdf_document: default
+---
+```{r}
+#install.packages("effectsize")
+```
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse) # Data processing and visualization
+library(readr) # Loading data
+library(effectsize)
+```
+
+## Effects-size P3RQ1
+
+
+
+```{r }
+p3s <- read_csv("INPUT/DATA/p3s_completo.csv") %>%
+  #rename(., ID = X1) %>% # Give a column's name to the first column (it had no name)
+  mutate(group = factor(group),
+         group_method = factor(group_method,levels = c("core","sonarQube","gamification")),
+         project = factor(project)) %>% # Create some factors
+  mutate(
+    comment_density = ifelse(comment_density > 1, NA, comment_density),
+    code_to_test = ifelse(code_to_test > 1, NA, code_to_test),
+    branch_coverage = ifelse(branch_coverage == 100, 99, branch_coverage),
+    branch_coverage = ifelse(branch_coverage == 0, 0.01, branch_coverage),
+     sqale_debt_ratio = ifelse(sqale_debt_ratio == 0, 0.01, sqale_debt_ratio),
+    test_success_density = ifelse(test_success_density == 100, 99, test_success_density)) %>% # Replace with NA high (non normal) values.
+  filter(branch_coverage > 50)  %>% # eliminación outlayer
+  #filter(test_success_density > 30)  %>% # eliminación outlayer
+  #filter(group == "2016-2017" | group == "2017-2018" | group == "2018-2019")  %>% # eliminación outlayer
+  filter(group == "2016-2017" | group == "2017-2018")  %>%
+  drop_na() #Eliminates NAs in the dataset
+
+#p3s
+```
+
+
+```{r echo=TRUE}
+writeLines("\n ******************** \n Effect size analysis RQ1 P3 \n ******************** \n")
+print("Smell Density effect size")
+effs_sd <- cohens_d(p3s$smells_density ~ group_method, data =p3s)
+interpret_cohens_d(effs_sd$Cohens_d, rules = "gignac2016")
+interpret_cohens_d(effs_sd$Cohens_d, rules = "cohen1988")
+print("------------------------------------")
+
+print(" Technical Debt Ratio effect size")
+effs_tdr <- cohens_d(sqale_debt_ratio ~ group_method, data =p3s)
+interpret_cohens_d(effs_tdr$Cohens_d, rules = "gignac2016")
+interpret_cohens_d(effs_tdr$Cohens_d, rules = "cohen1988")
+print("------------------------------------")
+
+
+print(" Branch Coverage effect size")
+effs_bc <-cohens_d( branch_coverage ~ group_method, data =p3s)
+interpret_cohens_d(effs_bc$Cohens_d, rules = "gignac2016")
+interpret_cohens_d(effs_bc$Cohens_d, rules = "cohen1988")
+print("-------------------------------------")
+
+
+
+print(" Code to Test (C2T) effect size")
+effs_c2t <- cohens_d(code_to_test ~ group_method, data =p3s)
+interpret_cohens_d(effs_c2t$Cohens_d, rules = "gignac2016")
+interpret_cohens_d(effs_c2t$Cohens_d, rules = "cohen1988")
+print("-------------------------------------")
+
+
+
+print("--------- Comment Density effect size")
+effs_cd <-cohens_d(comment_density ~ group_method, data =p3s)
+interpret_cohens_d(effs_cd$Cohens_d, rules = "gignac2016")
+interpret_cohens_d(effs_cd$Cohens_d, rules = "cohen1988")
+print("--------------------------------------")
+
+
+```
+
+
+## Effects-size P4RQ1
+
+```{r message=FALSE, warning=FALSE}
+
+p4s <- read_csv("INPUT/DATA/p4s_completo.csv") %>%
+  #rename(., ID = X1) %>% # Give a column's name to the first column (it had no name)
+  mutate(group = factor(group),
+         group_method = factor(group_method,levels = c("core","sonarQube","gamification")),
+         group_gamification = factor(group_gamification),
+         project = factor(project)) %>% # Create some factors
+  mutate(
+    comment_density = ifelse(comment_density > 1, NA, comment_density),
+    code_to_test = ifelse(code_to_test > 1, NA, code_to_test),
+    branch_coverage = ifelse(branch_coverage == 100, 99, branch_coverage),
+    branch_coverage = ifelse(branch_coverage == 0, 0.01, branch_coverage),
+    sqale_debt_ratio = ifelse(sqale_debt_ratio == 0, 0.01, sqale_debt_ratio),
+    smells_density = ifelse(smells_density == 0, 0.01, smells_density),
+    test_success_density = ifelse(test_success_density == 100, 99, test_success_density)
+    ) %>% # Replace with NA high (non normal) values.
+  filter(branch_coverage > 50)  %>% # eliminación outlayer
+  #filter(test_success_density > 30)  %>% # eliminación outlayer
+   #filter(group == "2016-2017" | group == "2017-2018" | group == "2018-2019" )%>%
+  filter(group == "2016-2017" | group == "2017-2018" )%>%
+  
+  drop_na() #Eliminates NAs in the dataset
+
+#p4s
+```
+
+```{r echo=TRUE}
+writeLines("\n ******************** \n Effect size analysis RQ1 P4 \n ******************** \n")
+print(" Smell Density effect size")
+effs_sd <- cohens_d(p4s$smells_density ~ group_method, data =p4s)
+interpret_cohens_d(effs_sd$Cohens_d, rules = "gignac2016")
+interpret_cohens_d(effs_sd$Cohens_d, rules = "cohen1988")
+print("------------------------------------")
+
+print(" Technical Debt Ratio effect size")
+effs_tdr <- cohens_d(sqale_debt_ratio ~ group_method, data =p4s)
+interpret_cohens_d(effs_tdr$Cohens_d, rules = "gignac2016")
+interpret_cohens_d(effs_tdr$Cohens_d, rules = "cohen1988")
+print("------------------------------------")
+
+
+print(" Branch Coverage effect size")
+effs_bc <-cohens_d( branch_coverage ~ group_method, data =p4s)
+interpret_cohens_d(effs_bc$Cohens_d, rules = "gignac2016")
+interpret_cohens_d(effs_bc$Cohens_d, rules = "cohen1988")
+print("-------------------------------------")
+
+
+
+print(" Code to Test (C2T) effect size")
+effs_c2t <- cohens_d(code_to_test ~ group_method, data =p4s)
+interpret_cohens_d(effs_c2t$Cohens_d, rules = "gignac2016")
+interpret_cohens_d(effs_c2t$Cohens_d, rules = "cohen1988")
+print("-------------------------------------")
+
+
+
+print("--------- Comment Density effect size")
+effs_cd <-cohens_d(comment_density ~ group_method, data =p4s)
+interpret_cohens_d(effs_cd$Cohens_d, rules = "gignac2016")
+interpret_cohens_d(effs_cd$Cohens_d, rules = "cohen1988")
+print("--------------------------------------")
+
+
+```
+
+## Effects-size P4RQ2
+
+```{r message=FALSE, warning=FALSE}
+
+p4s <- read_csv("INPUT/DATA/p4s_completo.csv") %>%
+  #rename(., ID = X1) %>% # Give a column's name to the first column (it had no name)
+  mutate(group = factor(group),
+         group_method = factor(group_method,levels = c("core","sonarQube","gamification")),
+         group_gamification = factor(group_gamification),
+         project = factor(project)) %>% # Create some factors
+  mutate(
+    comment_density = ifelse(comment_density > 1, NA, comment_density),
+    code_to_test = ifelse(code_to_test > 1, NA, code_to_test),
+    branch_coverage = ifelse(branch_coverage == 100, 99, branch_coverage),
+    branch_coverage = ifelse(branch_coverage == 0, 0.01, branch_coverage),
+    sqale_debt_ratio = ifelse(sqale_debt_ratio == 0, 0.01, sqale_debt_ratio),
+    smells_density = ifelse(smells_density == 0, 0.01, smells_density),
+    test_success_density = ifelse(test_success_density == 100, 99, test_success_density)
+    ) %>% # Replace with NA high (non normal) values.
+  filter(branch_coverage > 50)  %>% # eliminación outlayer
+  #filter(test_success_density > 30)  %>% # eliminación outlayer
+   #filter(group == "2016-2017" | group == "2017-2018" | group == "2018-2019" )%>%
+  filter(group == "2017-2018" | group == "2018-2019" )%>%
+  
+  drop_na() #Eliminates NAs in the dataset
+
+#p4s
+```
+
+```{r echo=TRUE}
+
+writeLines("\n ******************** \n Effect size analysis RQ2 P4 \n ******************** \n")
+
+print(" Smell Density effect size")
+effs_sd <- cohens_d(p4s$smells_density ~ group_method, data =p4s)
+interpret_cohens_d(effs_sd$Cohens_d, rules = "gignac2016")
+interpret_cohens_d(effs_sd$Cohens_d, rules = "cohen1988")
+print("------------------------------------")
+
+print(" Technical Debt Ratio effect size")
+effs_tdr <- cohens_d(sqale_debt_ratio ~ group_method, data =p4s)
+interpret_cohens_d(effs_tdr$Cohens_d, rules = "gignac2016")
+interpret_cohens_d(effs_tdr$Cohens_d, rules = "cohen1988")
+print("------------------------------------")
+
+
+print(" Branch Coverage effect size")
+effs_bc <-cohens_d( branch_coverage ~ group_method, data =p4s)
+interpret_cohens_d(effs_bc$Cohens_d, rules = "gignac2016")
+interpret_cohens_d(effs_bc$Cohens_d, rules = "cohen1988")
+print("-------------------------------------")
+
+
+
+print(" Code to Test (C2T) effect size")
+effs_c2t <- cohens_d(code_to_test ~ group_method, data =p4s)
+interpret_cohens_d(effs_c2t$Cohens_d, rules = "gignac2016")
+interpret_cohens_d(effs_c2t$Cohens_d, rules = "cohen1988")
+print("-------------------------------------")
+
+
+
+print("--------- Comment Density effect size")
+effs_cd <-cohens_d(comment_density ~ group_method, data =p4s)
+interpret_cohens_d(effs_cd$Cohens_d, rules = "gignac2016")
+interpret_cohens_d(effs_cd$Cohens_d, rules = "cohen1988")
+print("--------------------------------------")
+
+
+```
+
