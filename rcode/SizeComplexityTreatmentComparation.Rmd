@@ -1,0 +1,149 @@
+---
+title: "SizeComplexityTreatmentComparation"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+# Load library
+
+
+```{r warning=FALSE, message=FALSE}
+library(tidyverse) # Data processing and visualization
+library(readr) # Loading data
+library(ggpubr) # Mean plots
+
+```
+
+# Carga de Datos
+La carga de datos se realizará mediante la función ``read_csv()` del paquete `readr` (Wickham and Hester, 2020). Para el análisis de datos, además se transformarán algunas de las clases de las variables (de cáracter a factor) para que sean reconocidas apropiadamente tanto en la visualización como en el análisis de los mismos.
+
+Además mediante un análisis detallado del conjunto de datos se han definido algunas reglas de transformación sobre los datos originales:
+- Transformación de cotas superiores e inferiores, para transformar intervalo abierto y cerrado.
+- Eliminación de instancias outlayer extremas por motivos de distorsión de los análisis estadísticos. Se deberan analizar estas instancias y justificar su eliminación.
+- Eliminación de instancias con valores de las medidas fuera del rango de valores de su definición. Ejemplo porcentajes >100%.
+
+## Code Student SonarQubce measures LAB3 and LAB4 
+A continuación comenzamos con la carga de la base de datos completa con las medidas obtenidas con SonarQube, para las práctica p3 y p4 (objetos) durante tres cursos con distintos tratamientos (core,sonarqube, gamification) 
+
+
+
+```{r message=FALSE, warning=FALSE}
+
+sonarQubeDS <- read_csv("INPUT/DATA/p3s_p4s_completo.csv") %>%
+  #rename(., ID = X1) %>% # Give a column's name to the first column (it had no name)
+  mutate(group = factor(group),
+         group_method = factor(group_method,levels = c("core","sonarQube","gamification")),
+         group_lab = factor (lab),
+         project = factor(project)) %>% # Create some factors
+  mutate(
+    comment_density = ifelse(comment_density > 1, NA, comment_density),
+    code_to_test = ifelse(code_to_test > 1, NA, code_to_test),
+    branch_coverage = ifelse(branch_coverage == 100, 99, branch_coverage),
+    branch_coverage = ifelse(branch_coverage == 0, 0.01, branch_coverage),
+    smells_density = ifelse(smells_density == 0, 0.01, smells_density),
+     sqale_debt_ratio = ifelse(sqale_debt_ratio == 0, 0.01, sqale_debt_ratio),
+    test_success_density = ifelse(test_success_density == 100, 99, test_success_density)) %>% # Replace with NA high (non normal) values.
+  filter(branch_coverage > 50)  %>% # eliminación outlayer
+  #filter(test_success_density > 30)  %>% # eliminación outlayer
+  filter(lab=="P3" | lab=="P4") %>%
+  #filter(lab=="P4") %>%
+  filter(group == "2016-2017" | group == "2017-2018" | group == "2018-2019")  %>% # eliminación outlayer
+  #filter(group == "2016-2017" |group == "2017-2018" )  %>%
+  drop_na() #Eliminates NAs in the dataset
+
+sonarQubeDS
+```
+#Comparacion de Size
+##NLOC
+```{r}
+boxplot(ncloc ~ group_method, data = sonarQubeDS)
+tapply(sonarQubeDS$ncloc, sonarQubeDS$group_method, summary)
+hist(sonarQubeDS$ncloc[sonarQubeDS$group_method == "core"])
+hist(sonarQubeDS$ncloc[sonarQubeDS$group_method == "sonarQube"])
+hist(sonarQubeDS$ncloc[sonarQubeDS$group_method == "gamification"])
+```
+```{r}
+# Mean plots
+# ++++++++++++++++++++
+# Plot nloc by treatment core - sonarqube - gamification
+# Add error bars: mean_se
+# (other values include: mean_sd, mean_ci, median_iqr, ....)
+# library("ggpubr")
+nclocmeanse<-ggline(sonarQubeDS, x = "group_method", y = "ncloc", 
+       add = c("mean_se", "jitter"), 
+       order = c("core", "sonarQube", "gamification"),
+       ylab = "ncloc", xlab = "Treatment")
+
+kruskal.test(sonarQubeDS$ncloc ~ sonarQubeDS$group_method, data = sonarQubeDS)
+pairwise.wilcox.test(sonarQubeDS$ncloc , sonarQubeDS$group_method, p.adjust.method = "BH")
+```
+
+```{r}
+ggsave("nclocmean.png",plot=nclocmeanse,path ="./OUTPUT/FIGURES/sizetreatmentscomparation/",dpi = 600,scale = 1.5 )
+```
+
+##Number of classes
+
+```{r}
+boxplot(classes ~ group_method, data = sonarQubeDS)
+tapply(sonarQubeDS$classes, sonarQubeDS$group_method, summary)
+hist(sonarQubeDS$classes[sonarQubeDS$group_method == "core"])
+hist(sonarQubeDS$classes[sonarQubeDS$group_method == "sonarQube"])
+hist(sonarQubeDS$classes[sonarQubeDS$group_method == "gamification"])
+
+
+```
+
+```{r}
+# Mean plots
+# ++++++++++++++++++++
+# Plot classes by treatment core - sonarqube - gamification
+# Add error bars: mean_se
+
+nclassesmeanse<-ggline(sonarQubeDS, x = "group_method", y = "classes", 
+       add = c("mean_se", "jitter"), 
+       order = c("core", "sonarQube", "gamification"),
+       ylab = "classes", xlab = "Treatment")
+
+
+kruskal.test(sonarQubeDS$classes ~ sonarQubeDS$group_method, data = sonarQubeDS)
+pairwise.wilcox.test(sonarQubeDS$classes , sonarQubeDS$group_method, p.adjust.method = "BH")
+```
+```{r}
+ggsave("nclassesmean.png",plot=nclassesmeanse,path ="./OUTPUT/FIGURES/sizetreatmentscomparation/",dpi = 600,scale = 1.5 )
+
+```
+
+##Complexity
+
+```{r}
+boxplot(complexity~ group_method, data = sonarQubeDS)
+tapply(sonarQubeDS$complexity, sonarQubeDS$group_method, summary)
+hist(sonarQubeDS$complexity[sonarQubeDS$group_method == "core"])
+hist(sonarQubeDS$complexity[sonarQubeDS$group_method == "sonarQube"])
+hist(sonarQubeDS$complexity[sonarQubeDS$group_method == "gamification"])
+
+```
+```{r}
+# Mean plots
+# ++++++++++++++++++++
+# Plot complexity by treatment core - sonarqube - gamification
+# Add error bars: mean_se
+
+ggline(sonarQubeDS, x = "group_method", y = "complexity", 
+       add = c("mean_se", "jitter"), 
+       order = c("core", "sonarQube", "gamification"),
+       ylab = "complexity", xlab = "Treatment")
+kruskal.test(sonarQubeDS$complexity ~ sonarQubeDS$group_method, data = sonarQubeDS)
+pairwise.wilcox.test(sonarQubeDS$complexity , sonarQubeDS$group_method, p.adjust.method = "BH")
+
+```
