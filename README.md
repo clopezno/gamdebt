@@ -5,6 +5,7 @@
 - [Lab p4](https://github.com/clopezno/eduexperimentation_techdebt/blob/main/rcode/INPUT/DATA/p4s_completo.csv)
 
 ## R Code
+- [Load SonarQube Metrics](https://github.com/clopezno/gamdebt/blob/main/rcode/obtainingMeasuresFromSonarQube.R)
 - RQ 1 
   - [Lab P3](https://github.com/clopezno/eduexperimentation_techdebt/blob/main/rcode/P3RQ1.Rmd)
   - [Lab P4](https://github.com/clopezno/eduexperimentation_techdebt/blob/main/rcode/P4RQ1.Rmd)
