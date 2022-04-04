@@ -3,6 +3,7 @@
 ## Datasets
 - [Lab p3](https://github.com/clopezno/eduexperimentation_techdebt/blob/main/rcode/INPUT/DATA/p3s_completo.csv)
 - [Lab p4](https://github.com/clopezno/eduexperimentation_techdebt/blob/main/rcode/INPUT/DATA/p4s_completo.csv)
+- [Replication java codes to generate metrics dataset](https://github.com/clopezno/gamdebt/tree/main/replicationcodes)
 
 ## R Code
 - [Load SonarQube Metrics](https://github.com/clopezno/gamdebt/blob/main/rcode/obtainingMeasuresFromSonarQube.R)
