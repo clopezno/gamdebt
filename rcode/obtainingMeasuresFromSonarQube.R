@@ -158,7 +158,7 @@ for (projectKey in projectKeys) {
 projects_measures_data_frame_asnumbers <- modify_at(projects_measures_data_frame, metricsKeys, as.numeric)
 
 # Creating new columns
-projects_measures_data_frame_asnumbers$comment_density <- with(projects_measures_data_frame_asnumbers, comment_lines/ncloc)
+projects_measures_data_frame_asnumbers$comment_density <- with(projects_measures_data_frame_asnumbers, comment_lines/(ncloc+comment_lines))
 projects_measures_data_frame_asnumbers$smells_density <- with(projects_measures_data_frame_asnumbers, code_smells/ncloc)
 projects_measures_data_frame_asnumbers$code_to_test <- with(projects_measures_data_frame_asnumbers, tests/ncloc)
 
